@@ -36,6 +36,11 @@ error() {
 main() {
     info "Starting Lares Raspberry Pi App installation..."
 
+    # 0. Determine User and Group
+    INSTALL_USER=$(whoami)
+    INSTALL_GROUP=$(id -gn)
+    info "Running installation for user: $INSTALL_USER (group: $INSTALL_GROUP)"
+
     # 1. Install System Dependencies
     info "Updating package list and installing dependencies (curl, git, python3-venv, network-manager)..."
     sudo apt-get update > /dev/null
@@ -45,7 +50,7 @@ main() {
     # 2. Create Project Directory
     info "Creating installation directory at $APP_INSTALL_DIR..."
     sudo mkdir -p "$APP_INSTALL_DIR"
-    sudo chown -R pi:pi "$APP_INSTALL_DIR" # Grant user 'pi' ownership
+    sudo chown -R ${INSTALL_USER}:${INSTALL_GROUP} "$APP_INSTALL_DIR" # Grant user ownership
     cd "$APP_INSTALL_DIR"
     success "Directory created."
 
@@ -77,12 +82,12 @@ main() {
     # 5. Grant Execute Permissions
     info "Setting execute permissions for scripts..."
     # Note: network_control.sh is now inside lares_pi_app
-    chmod +x lares_pi_app/network_control.sh update.sh lares_pi_app/start_real.sh lares_pi_app/start_virtual.sh
+    chmod +x network_control.sh update.sh start_real.sh start_virtual.sh
     success "Permissions set."
 
     # 6. Configure Sudoers for Passwordless Execution
     info "Configuring passwordless sudo for network_control.sh..."
-    SUDOERS_LINE="pi ALL=(ALL) NOPASSWD: $APP_INSTALL_DIR/lares_pi_app/network_control.sh *"
+    SUDOERS_LINE="${INSTALL_USER} ALL=(ALL) NOPASSWD: $APP_INSTALL_DIR/network_control.sh *"
     if sudo grep -Fxq "$SUDOERS_LINE" /etc/sudoers; then
         success "Sudoers entry already exists."
     else
@@ -100,9 +105,9 @@ Description=Lares Raspberry Pi Control Service
 After=network.target
 
 [Service]
-User=pi
+User=${INSTALL_USER}
 WorkingDirectory=$APP_INSTALL_DIR
-ExecStart=$APP_INSTALL_DIR/lares_pi_app/start_real.sh
+ExecStart=$APP_INSTALL_DIR/start_real.sh
 Restart=always
 Environment=\"LARES_UPDATE_TOKEN=$UPDATE_TOKEN\"
 
