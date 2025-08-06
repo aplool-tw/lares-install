@@ -58,10 +58,19 @@ main() {
     info "Fetching latest release from GitHub repository: $GITHUB_REPO..."
     LATEST_RELEASE_INFO=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest")
     # Find the download URL for the asset that matches the package file name
-    DOWNLOAD_URL=$(echo "$LATEST_RELEASE_INFO" | grep "browser_download_url" | grep "lares-pi-app-v1.0.0.tar.gz" | head -n 1 | cut -d '"' -f 4)
+    # Extract the latest version from the release info
+    LATEST_VERSION=$(echo "$LATEST_RELEASE_INFO" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | sed 's/v//') # Remove 'v' prefix
+
+    if [ -z "$LATEST_VERSION" ]; then
+        error "Could not fetch latest version from GitHub."
+    fi
+
+    # Construct the expected package file name dynamically based on the latest version
+    EXPECTED_PACKAGE_FILE="lares-pi-app-v${LATEST_VERSION}.tar.gz"
+    DOWNLOAD_URL=$(echo "$LATEST_RELEASE_INFO" | grep "browser_download_url" | grep "$EXPECTED_PACKAGE_FILE" | head -n 1 | cut -d '"' -f 4)
     
     if [ -z "$DOWNLOAD_URL" ]; then
-        error "Could not find the download URL for lares-pi-app-v1.0.0.tar.gz in the latest release. Please check the repository."
+        error "Could not find the download URL for $EXPECTED_PACKAGE_FILE in the latest release. Please check the repository."
     fi
 
     info "Downloading and extracting latest version..."
