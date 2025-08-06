@@ -11,6 +11,7 @@ set -e
 GITHUB_REPO="aplool-tw/lares-pi-app"
 APP_INSTALL_DIR="/opt/lares-pi-app"
 SERVICE_NAME="lares-pi-app"
+LOG_DIR="/var/log/lares-pi-app"
 # ---
 
 # Helper functions for colored output
@@ -53,6 +54,12 @@ main() {
     sudo chown -R ${INSTALL_USER}:${INSTALL_GROUP} "$APP_INSTALL_DIR" # Grant user ownership
     cd "$APP_INSTALL_DIR"
     success "Directory created."
+
+    # 2.5. Create Log Directory and Set Permissions
+    info "Creating log directory at $LOG_DIR and setting permissions..."
+    sudo mkdir -p "$LOG_DIR"
+    sudo chown ${INSTALL_USER}:${INSTALL_GROUP} "$LOG_DIR"
+    success "Log directory created and permissions set."
 
     # 3. Download and Extract Latest Release
     info "Fetching latest release from GitHub repository: $GITHUB_REPO..."
