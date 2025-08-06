@@ -5,9 +5,9 @@
 ### Installation Command
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/aplool-tw/lares-install/HEAD/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/aplool-tw/lares-install/main/install.sh)"
 ```
 ### Uninstallation Command
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/aplool-tw/lares-install/HEAD/uninstall.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/aplool-tw/lares-install/main/uninstall.sh)"
 ```
